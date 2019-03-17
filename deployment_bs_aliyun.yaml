@@ -1,0 +1,47 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  namespace: default
+  name: bs-aliyun2
+  labels:
+    app: default-bs-aliyun2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: default-bs-aliyun2
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: default-bs-aliyun2
+    spec:
+      imagePullSecrets:
+      - name: "aliyun-repo"
+      containers:
+        - name: bs-aliyun2
+          image: "registry.cn-hangzhou.aliyuncs.com/chehuoyi/chyv3_bs_aliyun:1.4.1"
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app/BsConfig.json
+              name: vol1
+              subPath: BsConfig.json
+            - mountPath: /app/BsAliyunConfig.json
+              name: vol1
+              subPath: BsAliyunConfig.json
+      volumes:
+      - configMap:
+          items:
+          - key: base
+            path: BsConfig.json
+          - key: aliyun
+            path: BsAliyunConfig.json
+          name: bsconfig
+        name: vol1
